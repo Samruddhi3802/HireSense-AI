@@ -8,17 +8,19 @@ const resumeSchema=new mongoose.Schema({
     },
 
     fileName:{
-        type:String
+        type:String,
+        required:true
     },
 
     resumeText:{
-        type:String
+        type:String,
+        required:true
     },
 
     uploadDate:{
         type:Date,
         default:Date.now
     }
-})
+}, {timestamps:true});
 
 module.exports=mongoose.model("Resume", resumeSchema);

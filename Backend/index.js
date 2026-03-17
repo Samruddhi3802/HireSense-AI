@@ -1,26 +1,37 @@
-const express=require("express");
-const cors=require("cors");
-const dotenv=require("dotenv");
-const connectDB=require("./config/db");
-const testRoute=require("./routes/testRoutes");
-const authRoutes=require("./routes/authRoutes");
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const testRoute = require("./routes/testRoutes");
+const authRoutes = require("./routes/authRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
+const analysisRoutes = require("./routes/analysisRoutes");
+const cookieParser = require("cookie-parser");
 
 dotenv.config();
-const app=express();
+const app = express();
 
-const PORT=process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}))
 app.use(express.json());
+app.use(cookieParser());
+app.use(helmet());
 app.use("/api", testRoute);
 app.use("/api/auth", authRoutes);
+app.use("/api/resume", resumeRoutes);
+app.use("/api/analysis", analysisRoutes);
 
 connectDB();
 
-app.get("/", (req, res)=>{
+app.get("/", (req, res) => {
     res.send("HireSense AI Backend running successfully");
 })
 
-app.listen(PORT, ()=>{
+app.listen(PORT, () => {
     console.log("Server is listening on port ", PORT);
 })
