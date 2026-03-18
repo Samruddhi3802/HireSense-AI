@@ -19,6 +19,15 @@ exports.uploadResume = async (req, res) => {
 
     console.log("Extracted Text Length:", resumeText.length);
 
+    // Check if the user has already uploaded this exact resume
+    const existingResume = await Resume.findOne({ user: req.user.userId, resumeText: resumeText });
+
+    if (existingResume) {
+      return res.status(400).json({
+        message: "This resume has already been uploaded by you."
+      });
+    }
+
     // Save resume to DB
     const resume = await Resume.create({
       user: req.user.userId,

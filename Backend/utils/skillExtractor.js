@@ -1,23 +1,29 @@
 const skillsDB = require("./skillsDatabase");
-
-function normalize(text) {
-    return text.toLowerCase().replace(/[^a-z0-9+]/g, " ");
-}
+const processText = require("./nlpProcessor");
 
 function extractSkills(text) {
-    if (!text) return []; // safety check
-    const normalizedText = normalize(text);
+    const tokens = processText(text);
     const foundSkills = [];
+
     skillsDB.forEach(skill => {
-        //checking main skill
-        if (normalizedText.includes(skill.name)) {
+        const skillTokens = processText(skill.name);
+
+        const isMatch = skillTokens.every(token =>
+            tokens.includes(token)
+        );
+
+        if (isMatch) {
             foundSkills.push(skill.name);
             return;
         }
 
-        //checking variations 
         for (let variation of skill.variations) {
-            if (normalizedText.includes(variation)) {
+            const variationTokens = processText(variation);
+            const variationMatch = variationTokens.every(token =>
+                tokens.includes(token)
+            );
+
+            if (variationMatch) {
                 foundSkills.push(skill.name);
                 return;
             }
