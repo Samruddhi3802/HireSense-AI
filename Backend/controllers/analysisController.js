@@ -1,4 +1,5 @@
 const Resume = require("../models/Resume");
+const Analysis = require("../models/Analysis");
 const extractSkills = require("../utils/skillExtractor");
 const matchSkills = require("../utils/matchSkills");
 const calculateATSScore = require("../utils/atsScore");
@@ -21,6 +22,30 @@ exports.analyzeResume = async (req, res) => {
         if (resume.user.toString() !== req.user.userId) {
             return res.status(403).json({ message: "Unauthorized access" });
         }
+
+        // Check if this exact analysis already exists
+        const existingAnalysis = await Analysis.findOne({
+            user: req.user.userId,
+            resume: resumeId,
+            jobDescription: jobDescription
+        });
+
+        if (existingAnalysis) {
+            const breakdown = atsBreakdown(
+                existingAnalysis.score,
+                existingAnalysis.matchedSkills,
+                existingAnalysis.missingSkills
+            );
+
+            return res.json({
+                ATS_score: existingAnalysis.score,
+                matched_skills: existingAnalysis.matchedSkills,
+                missing_skills: existingAnalysis.missingSkills,
+                breakdown,
+                cached: true
+            });
+        }
+
         //Extract Skills
         const resumeSkills = extractSkills(resume.resumeText);
         const jdSkills = extractSkills(jobDescription);
@@ -33,6 +58,15 @@ exports.analyzeResume = async (req, res) => {
 
         //Breakdown
         const breakdown = atsBreakdown(score, matched, missing);
+
+        const analysis = await Analysis.create({
+            user: req.user.userId,
+            resume: resume._id,
+            jobDescription: jobDescription,
+            matchedSkills: matched,
+            missingSkills: missing,
+            score
+        });
 
         res.json({
             ATS_score: score,

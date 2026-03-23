@@ -2,12 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
+
 const connectDB = require("./config/db");
 const testRoute = require("./routes/testRoutes");
 const authRoutes = require("./routes/authRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const analysisRoutes = require("./routes/analysisRoutes");
-const cookieParser = require("cookie-parser");
+const aiRoutes = require("./routes/aiRoutes");
 
 dotenv.config();
 const app = express();
@@ -25,6 +27,7 @@ app.use("/api", testRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 app.use("/api/analysis", analysisRoutes);
+app.use("/api/ai", aiRoutes)
 
 connectDB();
 
